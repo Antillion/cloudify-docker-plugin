@@ -236,25 +236,35 @@ def pull(client, arguments, ctx):
     """
 
     arguments.update({'stream': True})
-    ctx.logger.info('Pulling repository: {0}'.format(arguments))
 
     image_id = None
 
     try:
-        for stream in client.pull(**arguments):
-            stream_dict = json.loads(stream)
-            image_id = stream_dict.get('id', image_id)
-            if 'Downloading' not in stream_dict.get('status', ''):
-                ctx.logger.info('Pulling Image status: {0}.'.format(
-                    stream_dict))
-    except docker.errors.APIError as e:
-        raise NonRecoverableError('Unabled to pull image: {0}.'
-                                  'Error: {1}.'.format(
-                                      arguments,
-                                      str(e)))
+        image_id = utils.get_image_id(
+            arguments.get('tag'), arguments.get('repository'), client)
 
-    image_id = utils.get_image_id(
-        arguments.get('tag'), image_id, client, ctx=ctx)
+        ctx.logger.info('Using already present image, id: {0}'.format(image_id))
+    except NonRecoverableError as e:
+        image_id = None # Image not found
+
+    if image_id is None:
+        ctx.logger.info('Pulling repository: {0}'.format(arguments))
+        try:
+            for stream in client.pull(**arguments):
+                stream_dict = json.loads(stream)
+                if 'id' in stream_dict:
+                    image_id = stream_dict.get('id')
+                if 'Complete' in stream_dict.get('status', ''):
+                    ctx.logger.info('docker_plugin.tasks.pull: {0}.'.format(
+                        stream_dict))
+
+            image_id = utils.get_image_id(
+                arguments.get('tag'), arguments.get('repository'), client)
+        except APIError as e:
+            raise NonRecoverableError(
+                'Unabled to pull image: {0}. Error: {1}.'
+                .format(arguments, str(e)))
+
     ctx.instance.runtime_properties['image_id'] = image_id
     ctx.logger.info('Pulled image, image_id: {0}'.format(image_id))
     return image_id
