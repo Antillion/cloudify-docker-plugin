@@ -223,7 +223,11 @@ def get_image(client, ctx):
         arguments['src'] = ctx.node.properties['image']['src']
         return import_image(client, arguments, ctx=ctx)
     else:
-        return pull(client, arguments, ctx=ctx)
+        existing_image_id = utils.get_image_id_if_exists(arguments['tag'], arguments['repository'], client, ctx)
+        if existing_image_id != None:
+            return existing_image_id
+        else:
+            return pull(client, arguments, ctx=ctx)
 
 
 def pull(client, arguments, ctx):
@@ -241,7 +245,7 @@ def pull(client, arguments, ctx):
 
     try:
         image_id = utils.get_image_id(
-            arguments.get('tag'), arguments.get('repository'), client)
+            arguments.get('tag'), arguments.get('repository'), client, ctx)
 
         ctx.logger.info('Using already present image, id: {0}'.format(image_id))
     except NonRecoverableError as e:
@@ -259,7 +263,7 @@ def pull(client, arguments, ctx):
                         stream_dict))
 
             image_id = utils.get_image_id(
-                arguments.get('tag'), arguments.get('repository'), client)
+                arguments.get('tag'), arguments.get('repository'), client, ctx)
         except APIError as e:
             raise NonRecoverableError(
                 'Unabled to pull image: {0}. Error: {1}.'

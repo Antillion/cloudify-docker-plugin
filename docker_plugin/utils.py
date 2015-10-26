@@ -18,6 +18,37 @@ import docker
 # Cloudify Imports
 from cloudify.exceptions import RecoverableError, NonRecoverableError
 
+def get_image_id_if_exists(tag, image_name, client, ctx):
+    """ Gets the image ID if one with the supplied name and optional tag exists.
+
+    :param tag: the image tag provided in the blueprint
+    :param image_name: name of the image provided in the blueprint
+    :param client: docker client
+    :param ctx: Cloudify context
+    returns image_id
+        if the image name and tag are present
+        then that is used
+        if the image name is present
+        then that is used
+        if no match is found
+        then None is returned
+    """
+    repo_tag = image_name + ':' + ('latest' if tag is None else tag)
+
+    try:
+        images = client.images()
+    except docker.errors.APIError as e:
+        raise NonRecoverableError('Unable to get last created image: '
+                                  '{}'.format(e))
+
+    for img in images:
+        img_id, tags = (str(img.get('Id')), img.get('RepoTags'))
+
+        if filter(None, [repotag if
+                  repo_tag in repotag else None for repotag in tags]):
+            return img_id
+
+    return None
 
 def get_image_id(tag, image_id, client, ctx):
     """ Attempts to get the correct image id from Docker.
