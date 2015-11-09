@@ -5,7 +5,7 @@
 plugins:
   docker:
     executor: host_agent
-    source: https://github.com/Antillion/cloudify-docker-plugin/archive/1.2a.zip
+    source: https://github.com/Antillion/cloudify-docker-plugin/archive/1.2b.zip
 
 node_types:
 
