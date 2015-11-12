@@ -17,7 +17,7 @@ import setuptools
 setuptools.setup(
 
     name='cloudify-docker-plugin',
-    version='1.2.4',
+    version='1.2.5',
     author='Gigaspaces',
     author_email='cosmo-admin@gigaspaces.com',
     description='A Cloudify plugin enabling it to create'

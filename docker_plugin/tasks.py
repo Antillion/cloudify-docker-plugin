@@ -64,7 +64,7 @@ def create_container(params, daemon_client=None, **_):
 
     try:
         container = client.create_container(**arguments)
-    except docker.errors.APIError as e:
+    except APIError as e:
         raise NonRecoverableError('Error while creating container: '
                                   '{0}'.format(str(e)))
 
@@ -99,7 +99,7 @@ def start(params, processes_to_wait_for, retry_interval,
 
     try:
         response = client.start(**arguments)
-    except docker.errors.APIError as e:
+    except APIError as e:
         raise NonRecoverableError('Failed to start container: '
                                   '{0}.'.format(str(e)))
 
@@ -151,7 +151,7 @@ def stop(retry_interval, params, daemon_client=None, **_):
 
     try:
         client.stop(**arguments)
-    except docker.errors.APIError as e:
+    except APIError as e:
         raise NonRecoverableError('Failed to stop container: '
                                   '{0}'.format(str(e)))
 
@@ -186,7 +186,7 @@ def remove_container(params, daemon_client=None, **_):
 
     try:
         client.remove_container(**arguments)
-    except docker.errors.APIError as e:
+    except APIError as e:
         raise NonRecoverableError('Failed to delete container: '
                                   '{0}.'.format(str(e)))
 
@@ -292,7 +292,7 @@ def import_image(client, arguments, ctx):
 
     try:
         output = client.import_image(**arguments)
-    except docker.errors.APIError as e:
+    except APIError as e:
         raise NonRecoverableError('Unable to import image: '
                                   '{0}.'.format(str(e)))
 
