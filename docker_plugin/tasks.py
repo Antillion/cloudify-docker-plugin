@@ -19,7 +19,7 @@
 import json
 
 # Third-party Imports
-import docker.errors
+from docker.errors import APIError
 
 # Cloudify Imports
 from cloudify import ctx
