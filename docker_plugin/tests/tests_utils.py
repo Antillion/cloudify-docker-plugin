@@ -19,6 +19,7 @@ import json
 
 # Third Party Imports
 import docker
+from mock import patch, MagicMock
 
 # Cloudify Imports is imported and used in operations
 from cloudify.mocks import MockCloudifyContext
@@ -178,12 +179,64 @@ class TestUtils(testtools.TestCase):
         out = utils.get_container_dictionary(client)
         self.assertEquals(container['Id'], out['Id'])
 
+    def test_get_image_id_when_not_present(self):
+        client = MagicMock()
+        client.images.return_value = []
+
+        self.assertRaises(NonRecoverableError, utils.get_image_id, *['any_tag', 'any repo', client])
+
+    def test_get_image_id_without_registry(self):
+        repo_name = 'some_repo'
+        tag = 'latest'
+        image_id = 'some-repo-latest-id'
+
+        client = MagicMock()
+        client.images.return_value = [
+            {'RepoTags': ['{}:{}'
+                              .format(repo_name, tag)],
+             'Id': image_id}
+        ]
+        self.assertEquals(image_id,
+                          utils.get_image_id(tag, repo_name, client))
+
+    def test_get_image_id_with_registry(self):
+        repo_name = 'some_repo'
+        tag = 'latest'
+        image_id = 'some-repo-latest-id'
+
+        client = MagicMock()
+        client.images.return_value = [
+            {'RepoTags': ['docker.io/{}:{}'
+                              .format(repo_name, tag)],
+             'Id': image_id}
+        ]
+
+        self.assertEquals(image_id,
+                          utils.get_image_id(tag, repo_name, client))
+
+    def test_get_container_dictionary_when_not_first(self):
+        ctx = self.get_mock_context(
+            'test_get_container_dictionary_when_not_first')
+        container_id = 'the-expected-container-id'
+        current_ctx.set(ctx=ctx)
+        client = MagicMock()
+        client.containers.return_value = [
+            {'Id': 'some_other_id'}, {'Id': container_id}
+        ]
+
+        ctx.instance.runtime_properties['container_id'] = container_id
+
+        dictionary = utils.get_container_dictionary(client)
+        self.assertTrue(dictionary is not None)
+
+
     def test_check_container_status(self):
 
         name = 'test_check_container_status'
         client = self.get_docker_client()
         self.pull_image(client)
         ctx = self.get_mock_context(name)
+
         current_ctx.set(ctx=ctx)
 
         for image in self.get_docker_images(client):
