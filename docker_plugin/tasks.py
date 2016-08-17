@@ -114,21 +114,25 @@ def start(params, processes_to_wait_for, retry_interval,
     if params.get('processes_to_wait_for'):
         utils.wait_for_processes(processes_to_wait_for, retry_interval,
                                  client)
+    container_id = ctx.instance.runtime_properties['container_id']
+    ctx.logger.info('Started container: {0}.'.format(container_id))
 
-    ctx.logger.info('Started container: {0}.'.format(
-        ctx.instance.runtime_properties['container_id']))
+    container_dictionary = utils.get_container_dictionary(client)
 
-    if utils.get_container_dictionary(client):
-        inspect_output = utils.inspect_container(client)
-        ctx.instance.runtime_properties['ports'] = \
-            inspect_output.get('Ports', None)
-        ctx.instance.runtime_properties['network_settings'] = \
-            inspect_output.get('NetworkSettings', None)
+    if container_dictionary is None:
+        raise NonRecoverableError('Unable to obtain container dictionary. '
+                                  'Expected container ID: {}'.format(container_id))
+
+    inspect_output = utils.inspect_container(client)
+    ctx.instance.runtime_properties['ports'] = \
+        inspect_output.get('Ports', None)
+    ctx.instance.runtime_properties['network_settings'] = \
+        inspect_output.get('NetworkSettings', None)
 
     top_info = utils.get_top_info(client)
 
     ctx.logger.info('Container: {0} Forwarded ports: {1} Top: {2}.'.format(
-        ctx.instance.runtime_properties['container_id'],
+        container_id,
         inspect_output.get('Ports', None), top_info))
 
 
