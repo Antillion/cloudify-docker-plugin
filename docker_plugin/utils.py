@@ -29,7 +29,10 @@ def get_image_id(tag, repository, client):
             'Unable to get last created image: {0}'.format(e))
 
     for image in images:
-        if '{0}:{1}'.format(repository, tag) in image.get('RepoTags'):
+        search_tag = '{0}:{1}'.format(repository, tag)
+        matching_tags = filter(lambda repo_tag: search_tag in repo_tag,
+                               image.get('RepoTags'))
+        if len(matching_tags) > 0:
             return image.get('Id')
 
     raise NonRecoverableError(
