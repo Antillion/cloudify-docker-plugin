@@ -120,9 +120,9 @@ def get_container_dictionary(client):
 
     container_id = ctx.instance.runtime_properties.get('container_id')
     if container_id is None:
-        ctx.logger.debug(
-            'Unable to retrieve container dictionary.'
-            'ctx container ID value is None')
+        ctx.logger.debug('Unable to retrieve container dictionary. '
+                         'ctx container ID value is None')
+
         return None
 
     try:
@@ -131,11 +131,9 @@ def get_container_dictionary(client):
         raise NonRecoverableError(
             'Unable to list all containers: {0}.'.format(str(e)))
 
-
     for container in all_containers:
         if container_id in container.get('Id'):
             return container
-
 
     ctx.logger.debug(
         'Unable to retrieve container dictionary.'

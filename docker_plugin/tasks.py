@@ -121,7 +121,8 @@ def start(params, processes_to_wait_for, retry_interval,
 
     if container_dictionary is None:
         raise NonRecoverableError('Unable to obtain container dictionary. '
-                                  'Expected container ID: {}'.format(container_id))
+                                  'Expected container ID: {}'
+                                  .format(container_id))
 
     inspect_output = utils.inspect_container(client)
     ctx.instance.runtime_properties['ports'] = \
