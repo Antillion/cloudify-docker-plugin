@@ -131,16 +131,17 @@ def get_container_dictionary(client):
         raise NonRecoverableError(
             'Unable to list all containers: {0}.'.format(str(e)))
 
+
     for container in all_containers:
-        if container_id in \
-                container.get('Id'):
+        if container_id in container.get('Id'):
             return container
-        else:
-            ctx.logger.debug(
-                'Unable to retrieve container dictionary.'
-                'container with ID {} does not exist.'
-                .format(container_id))
-            return None
+
+
+    ctx.logger.debug(
+        'Unable to retrieve container dictionary.'
+        'container with ID {} does not exist.'
+        .format(container_id))
+    return None
 
 
 def check_container_status(client):
