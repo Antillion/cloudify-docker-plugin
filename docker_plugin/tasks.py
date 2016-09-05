@@ -296,11 +296,10 @@ def import_image(client, arguments):
         output = client.import_image(**arguments)
     except APIError as e:
         raise NonRecoverableError(
-            'Failed to start container: {0}.'.format(str(e)))
+            'Failed to import image: {0}.'.format(str(e)))
 
     ctx.logger.info('output: {}'.format(output))
     image_id = json.loads(output).get('status')
-
     image_id = utils.get_image_id(
         arguments.get('tag'), arguments.get('repository'), client)
 
