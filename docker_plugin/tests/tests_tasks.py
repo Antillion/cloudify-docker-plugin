@@ -97,6 +97,33 @@ class TestTasks(testtools.TestCase):
             NonRecoverableError, tasks.create_container, params, ctx=ctx)
         self.assertIn('Use external resource, but', ex.message)
 
+    @patch('docker_plugin.tasks.docker_client.get_client')
+    def test_create_with_dockerpy_params(self, get_client_mock):
+        name = 'test_create_with_dockerpy_params'
+        ctx = self.get_mock_context(name)
+        fake_image_id = '10101010101'
+        current_ctx.set(ctx=ctx)
+
+        mock_client = MagicMock()
+
+        mock_client.create_container.return_value = {
+            'Id': 'mocked-create_container-return-value-id'
+        }
+        mock_client.images.return_value = [
+            {'RepoTags': ['{}:latest'.format(TEST_IMAGE)], 'Id': fake_image_id}
+        ]
+
+        get_client_mock.return_value = mock_client
+
+        tasks.create_container({'insecure_registry': True}, ctx=ctx)
+
+        mock_client.create_container.assert_called_with(
+            name=name, image=fake_image_id, insecure_registry=True
+        )
+
+
+
+
     def test_get_image_no_src_or_repo(self):
         name = 'test_get_image_no_src_or_repo'
         ctx = self.get_mock_context(name)
