@@ -32,6 +32,30 @@ IGNORED_LOCAL_WORKFLOW_MODULES = (
 )
 
 
+
+
+# OLLIE:
+
+# 1. insecure_registry flag
+#For some reason the insecure_registry flag is not doing anything on a
+#pull. It could be that the code isn't actually passing the flag to the
+# correct place! Implement a blueprint test to validate it's being passed
+# correctly before trying out the stupid deployment.
+
+# 2. You're also trying to get the Pip deploy working
+# Edge forwards to a working system, then tear it down and start from fresh.
+# You did put some Docker install outside of the blueprint, but it's actually
+# in the blueprint already!
+# Before running the PIP, check that the SSH key is present. Also host writing
+# of the privatey docker registry may not be working so well :(
+
+# 3. Annnnd in parallel: JIRA
+#
+# Continue to add Epics and User Stories to the JIRA in Ravello. Try to use
+# the hostname of the JIRA box rather than IP so that 1Password doesn't
+# get confused. Also consider a blueprint for it.
+
+
 class TestPullWorkflow(testtools.TestCase):
 
     def setUp(self):

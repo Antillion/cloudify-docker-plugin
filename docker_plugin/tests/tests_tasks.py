@@ -19,6 +19,7 @@ import json
 
 # Third Party Imports
 import docker
+from mock import patch, MagicMock
 
 # Cloudify Imports is imported and used in operations
 from cloudify.mocks import MockCloudifyContext
@@ -97,29 +98,57 @@ class TestTasks(testtools.TestCase):
             NonRecoverableError, tasks.create_container, params, ctx=ctx)
         self.assertIn('Use external resource, but', ex.message)
 
+    def test_pull_with_args(self):
+        name = 'test_create_with_dockerpy_params'
+        ctx = self.get_mock_context(name)
+        fake_image_id = '10101010101'
+        current_ctx.set(ctx=ctx)
+
+        arguments = {
+            'repository': name, 'tag': 'latest', 'insecure_registry': True
+        }
+
+        mock_client = MagicMock()
+        mock_client.pull.return_value = [json.dumps(
+            {'id': 'the-id',
+             'status': 'Complete'})]
+        mock_client.images.return_value = [
+            {'RepoTags': ['{}:latest'.format(arguments['repository'])],
+             'Id': fake_image_id}
+        ]
+
+
+        tasks.pull(mock_client, arguments)
+
+        mock_client.pull.assert_called_with(**arguments)
+
     @patch('docker_plugin.tasks.docker_client.get_client')
     def test_create_with_dockerpy_params(self, get_client_mock):
         name = 'test_create_with_dockerpy_params'
         ctx = self.get_mock_context(name)
         fake_image_id = '10101010101'
         current_ctx.set(ctx=ctx)
+        ctx.node.properties['image']['insecure_registry'] = True
 
         mock_client = MagicMock()
 
         mock_client.create_container.return_value = {
-            'Id': 'mocked-create_container-return-value-id'
-        }
+            'Id': 'mocked-create_container-return-value-id'}
         mock_client.images.return_value = [
-            {'RepoTags': ['{}:latest'.format(TEST_IMAGE)], 'Id': fake_image_id}
-        ]
+            {'RepoTags': ['{}:latest'.format(TEST_IMAGE)],
+             'Id': fake_image_id}]
+        mock_client.pull.return_value = [json.dumps(
+            {'id': 'the-id', 'status': 'Complete'})]
 
         get_client_mock.return_value = mock_client
 
-        tasks.create_container({'insecure_registry': True}, ctx=ctx)
+        tasks.create_container({}, ctx=ctx)
 
         mock_client.create_container.assert_called_with(
-            name=name, image=fake_image_id, insecure_registry=True
-        )
+            name=name, image=fake_image_id)
+        mock_client.pull.assert_called_with(
+            repository=TEST_IMAGE, stream=True, tag='latest',
+            insecure_registry=True)
 
 
 

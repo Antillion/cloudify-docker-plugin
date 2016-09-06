@@ -241,6 +241,9 @@ def get_image(client):
         arguments['src'] = ctx.node.properties['image']['src']
         return import_image(client, arguments)
     else:
+        if 'insecure_registry' in ctx.node.properties['image']:
+            arguments['insecure_registry'] = True
+
         return pull(client, arguments)
 
 

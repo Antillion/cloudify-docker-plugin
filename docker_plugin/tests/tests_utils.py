@@ -192,8 +192,7 @@ class TestUtils(testtools.TestCase):
 
         client = MagicMock()
         client.images.return_value = [
-            {'RepoTags': ['{}:{}'
-                              .format(repo_name, tag)],
+            {'RepoTags': ['{}:{}'.format(repo_name, tag)],
              'Id': image_id}
         ]
         self.assertEquals(image_id,
@@ -206,8 +205,7 @@ class TestUtils(testtools.TestCase):
 
         client = MagicMock()
         client.images.return_value = [
-            {'RepoTags': ['docker.io/{}:{}'
-                              .format(repo_name, tag)],
+            {'RepoTags': ['docker.io/{}:{}'.format(repo_name, tag)],
              'Id': image_id}
         ]
 
