@@ -5,7 +5,7 @@
 plugins:
   docker:
     executor: host_agent
-    source: https://github.com/cloudify-cosmo/cloudify-docker-plugin/archive/1.3.zip
+    source: https://github.com/Antillion/cloudify-docker-plugin/archive/1.3-build-docker-io-check-deploy.zip
     package_name: cloudify-docker-plugin
     package_version: '1.3'
 
