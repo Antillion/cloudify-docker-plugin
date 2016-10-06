@@ -29,9 +29,13 @@ def get_image_id(tag, repository, client):
             'Unable to get last created image: {0}'.format(e))
 
     for image in images:
+        repo_tags = image.get('RepoTags')
+        if repo_tags is None:
+            ctx.logger.warn('No repository tags for image {}'.format(image))
+            repo_tags = []
         search_tag = '{0}:{1}'.format(repository, tag)
         matching_tags = filter(lambda repo_tag: search_tag in repo_tag,
-                               image.get('RepoTags'))
+                               repo_tags)
         if len(matching_tags) > 0:
             return image.get('Id')
 
